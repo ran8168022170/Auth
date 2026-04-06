@@ -5,7 +5,6 @@ import dotenv from "dotenv";
 import userRouter from "./routes/user.route.js";
 import authRouter from "./routes/auth.route.js";
 dotenv.config();
-console.log("JWT_SECRET from env:", process.env.JWT_SECRET);
 mongoose
   .connect(process.env.MONGO)
   .then(() => {
