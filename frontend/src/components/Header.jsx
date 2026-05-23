@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 
 export default function Header() {
   const { currentUser } = useSelector((state) => state.user);
+  console.log("header avatar", currentUser?.avatar);
   return (
     <header className="bg-slate-200 shadow-md">
       <div className="flex justify-between items-center max-w-6xl mx-auto p-3 ">
@@ -22,30 +23,39 @@ export default function Header() {
         </form>
 
         <ul className="flex gap-4 items-center">
-          <Link to="/">
-            <li className="hidden sm:inline text-slate-700 hover:underline">
+          <li>
+            <Link
+              to="/"
+              className="hidden sm:inline text-slate-700 hover:underline"
+            >
               Home
-            </li>
-          </Link>
+            </Link>
+          </li>
 
-          <Link to="/about">
-            <li className="hidden sm:inline text-slate-700 hover:underline">
+          <li>
+            <Link
+              to="/about"
+              className="hidden sm:inline text-slate-700 hover:underline"
+            >
               About
-            </li>
-          </Link>
-          <Link to="/profile">
-            {currentUser ? (
-              <img
-                className="rounded-full h-7 w-7 object-cover"
-                src={currentUser.avatar}
-                alt="profile"
-              />
-            ) : (
-              <li className="hidden sm:inline text-slate-700 hover:underline">
-                SignIn
-              </li>
-            )}
-          </Link>
+            </Link>
+          </li>
+
+          <li>
+            <Link to="/profile">
+              {currentUser ? (
+                <img
+                  className="rounded-full h-25 w-25  object-cover border border-red-500"
+                  src={currentUser?.avatar}
+                  alt="profile"
+                />
+              ) : (
+                <span className="hidden sm:inline text-slate-700 hover:underline">
+                  SignIn
+                </span>
+              )}
+            </Link>
+          </li>
         </ul>
       </div>
     </header>
