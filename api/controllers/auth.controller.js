@@ -43,7 +43,7 @@ export const signin = async (req, res, next) => {
     const { password: pass, ...rest } = validUser._doc;
 
     res
-      .cookie("access_token", token, { httponly: true })
+      .cookie("access_token", token, { httpOnly: true })
       .status(200)
       .json(rest);
   } catch (error) {
@@ -84,6 +84,15 @@ export const google = async (req, res, next) => {
         .status(200)
         .json(rest);
     }
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const signOut = async (req, res, next) => {
+  try {
+    res.clearCookie("access_token");
+    res.status(201).json("user logged out successfully");
   } catch (error) {
     next(error);
   }
