@@ -9,9 +9,6 @@ export const test = (req, res) => {
 };
 
 export const updateUser = async (req, res, next) => {
-  console.log("hello");
-  console.log("req.user =", req.user);
-  console.log("req.params =", req.params);
   if (req.user.id !== req.params.id)
     return next(errorHandler(401, "update only your account"));
   try {
@@ -39,9 +36,6 @@ export const updateUser = async (req, res, next) => {
 };
 
 export const deleteUser = async (req, res, next) => {
-  console.log("DELETE req.user =", req.user);
-  console.log("DELETE req.params =", req.params);
-
   if (req.user.id !== req.params.id)
     return next(errorHandler(401, "you can delete only your account"));
 
