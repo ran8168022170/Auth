@@ -7,6 +7,9 @@ import {
   updateUserFailure,
   updateUserStart,
   updateUserSuccess,
+  signOutUserStart,
+  signOutUserSuccess,
+  signOutUserFailure,
 } from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
 import {
@@ -28,11 +31,11 @@ export default function Profile() {
 
   console.log(currentUser);
   console.log("formdata", formData);
-  useEffect(() => {
-    if (file) {
-      handleFileUpload(file);
-    }
-  }, [file]);
+  // useEffect(() => {
+  //   if (file) {
+  //     handleFileUpload(file);
+  //   }
+  // }, [file]);
 
   useEffect(() => {
     if (filePerc === 100) {
@@ -44,93 +47,107 @@ export default function Profile() {
     }
   }, [filePerc]);
 
-  const handleFileUpload = (file) => {
-    const storage = getStorage(app);
-    const fileName = new Date().getTime() + file.name;
-    const storageRef = ref(storage, fileName);
-    const uploadTask = uploadBytesResumable(storageRef, file);
+  // const handleFileUpload = (file) => {
+  //   const storage = getStorage(app);
+  //   const fileName = new Date().getTime() + file.name;
+  //   const storageRef = ref(storage, fileName);
+  //   const uploadTask = uploadBytesResumable(storageRef, file);
 
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        if (filePerc == 0) {
-          setFilePerc(0);
-        }
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        const roundedProgress = Math.round(progress);
+  //   uploadTask.on(
+  //     "state_changed",
+  //     (snapshot) => {
+  //       if (filePerc == 0) {
+  //         setFilePerc(0);
+  //       }
+  //       const progress =
+  //         (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+  //       const roundedProgress = Math.round(progress);
 
-        setFilePerc(roundedProgress);
+  //       setFilePerc(roundedProgress);
 
-        console.log("upload is " + roundedProgress + "%done");
-      },
-      (error) => {
-        console.log(error);
-        setFileUploadError(true);
-      },
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURl) => {
-          setFormData({ ...formData, avatar: downloadURl });
-        });
-      },
-    );
-  };
+  //       console.log("upload is " + roundedProgress + "%done");
+  //     },
+  //     (error) => {
+  //       console.log(error);
+  //       setFileUploadError(true);
+  //     },
+  //     () => {
+  //       getDownloadURL(uploadTask.snapshot.ref).then((downloadURl) => {
+  //         setFormData({ ...formData, avatar: downloadURl });
+  //       });
+  //     },
+  //   );
+  // };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  //   try {
-  //     dispatch(updateUserStart);
-  //     const res= await fetch(`/api/user/update/${currentUser._id}`,
-  //     {
-  //       method:'post',
-  //       headers:{
-  //         'Content-Type':'application/json',
+    try {
+      dispatch(updateUserStart);
+      const res = await fetch(`/api/user/update/${currentUser._id}`, {
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(updateUserFailure(data.message));
+        return;
+      }
+      dispatch(updateUserSuccess(data));
+      setUpdateSuccess(true);
+    } catch (error) {
+      dispatch(updateUserFailure(error.message));
+    }
+  };
 
-  //       },
-  //       body: JSON.stringify(formData)
-  //     });
-  //     const data=await res.json();
-  //     if(data.success===false){
-  //       dispatch(updateUserFailure(data.message));
-  //       return;
-  //     }
-  //     dispatch(updateUserSuccess(data));
-  //     setUpdateSuccess(true);
-  //   } catch (error) {
-  //     dispatch(updateUserFailure(error.message));
-  //   }
-  // };
+  const handleDeleteUser = async () => {
+    try {
+      dispatch(deleteUserStart());
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: "DELETE",
+      });
 
-  // const handleDeleteUser = ()=>{
-  //   try {
-  //     dispatch(deleteUserStart());
-  //   const res= await fetch(`/api/user/delete/${currentUser._id}`,{
-  //     method:'DELETE',
-  //   })
+      const data = await res.json();
 
-  //   const data= await res.json();
+      if (data.success === false) {
+        dispatch(deleteUserFailure(data.message));
+        return;
+      }
 
-  //   if(data === false){
-  //     dispatch(deleteUserFailure(data.message));
+      dispatch(deleteUserSuccess(data));
+    } catch (error) {
+      dispatch(deleteUserFailure(error.message));
+    }
+  };
 
-  //   }
+  const handleSignOutUser = async () => {
+    try {
+      signOutUserStart();
+      const res = await fetch("/api/auth/signout");
+      const data = await res.json();
 
-  //   dispatch(deleteUserSuccess);
+      if (data.success === false) {
+        dispatch(signOutUserFailure(data.message));
+        return;
+      }
 
-  //   } catch (error) {
-  //     dispatch(deleteUserFailure(error.message));
+      dispatch(signOutUserSuccess(data));
+    } catch (error) {
+      dispatch(signOutUserFailure(error.message));
+    }
+  };
 
-  //   }
-  // }
   return (
     <div className="mx-auto p-3 max-w-lg ">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
-      <form action="" className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} action="" className="flex flex-col gap-4">
         <input
           onChange={(e) => {
             setFile(e.target.files[0]);
@@ -188,8 +205,12 @@ export default function Profile() {
         </button>
       </form>
       <div className="flex justify-between mt-5">
-        <span className="text-red-600">Delete Account</span>
-        <span className="text-red-600">Sign-Out</span>
+        <span onClick={handleDeleteUser} className="text-red-600">
+          Delete Account
+        </span>
+        <span onClick={handleSignOutUser} className="text-red-600">
+          Sign-Out
+        </span>
       </div>
       <p className="mt-5 text-red-700">{error ? error : ""}</p>
       <p className="mt-5 text-green-700">
