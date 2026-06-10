@@ -59,6 +59,11 @@ const userSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    updateAvatar: (state, action) => {
+      if (state.currentUser) {
+        state.currentUser.avatar = action.payload;
+      }
+    },
   },
 });
 export const {
@@ -74,5 +79,6 @@ export const {
   signOutUserFailure,
   signOutUserStart,
   signOutUserSuccess,
+  updateAvatar,
 } = userSlice.actions;
 export default userSlice.reducer;

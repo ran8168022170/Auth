@@ -10,6 +10,7 @@ import {
   signOutUserStart,
   signOutUserSuccess,
   signOutUserFailure,
+  updateAvatar,
 } from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
 import {
@@ -29,6 +30,7 @@ export default function Profile() {
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const dispatch = useDispatch();
 
+  console.log(`current user 1: ${currentUser?.avatar}`);
   // useEffect(() => {
   //   if (file) {
   //     handleFileUpload(file);
@@ -36,45 +38,73 @@ export default function Profile() {
   // }, [file]);
 
   useEffect(() => {
-    if (filePerc === 100) {
+    if (updateSuccess === true) {
       const timer = setTimeout(() => {
-        setFilePerc(0);
+        setUpdateSuccess(false);
       }, 5000);
 
       return () => clearTimeout(timer);
     }
-  }, [filePerc]);
+  }, [updateSuccess]);
+
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    console.log(file);
+    if (!file) return;
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", "mern_auth");
+    data.append("cloud_name", "dixz7bt9u");
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/dixz7bt9u/image/upload",
+      {
+        method: "POST",
+        body: data,
+      },
+    );
+
+    console.log("hello");
+
+    const urlSource = await res.json();
+    setFormData({ ...formData, avatar: urlSource.url });
+    dispatch(updateAvatar(urlSource.url));
+    console.log("urlSource", urlSource.url);
+    console.log("currentuseravatar 2", currentUser.avatar);
+  };
 
   // const handleFileUpload = (file) => {
-  //   const storage = getStorage(app);
-  //   const fileName = new Date().getTime() + file.name;
-  //   const storageRef = ref(storage, fileName);
-  //   const uploadTask = uploadBytesResumable(storageRef, file);
+  //   console.log("hello");
+  //   console.log(file);
 
-  //   uploadTask.on(
-  //     "state_changed",
-  //     (snapshot) => {
-  //       if (filePerc == 0) {
-  //         setFilePerc(0);
-  //       }
-  //       const progress =
-  //         (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-  //       const roundedProgress = Math.round(progress);
+  //   // const storage = getStorage(app);
+  //   // const fileName = new Date().getTime() + file.name;
+  //   // const storageRef = ref(storage, fileName);
+  //   // const uploadTask = uploadBytesResumable(storageRef, file);
 
-  //       setFilePerc(roundedProgress);
+  //   // uploadTask.on(
+  //   //   "state_changed",
+  //   //   (snapshot) => {
+  //   //     if (filePerc == 0) {
+  //   //       setFilePerc(0);
+  //   //     }
+  //   //     const progress =
+  //   //       (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+  //   //     const roundedProgress = Math.round(progress);
 
-  //       console.log("upload is " + roundedProgress + "%done");
-  //     },
-  //     (error) => {
-  //       console.log(error);
-  //       setFileUploadError(true);
-  //     },
-  //     () => {
-  //       getDownloadURL(uploadTask.snapshot.ref).then((downloadURl) => {
-  //         setFormData({ ...formData, avatar: downloadURl });
-  //       });
-  //     },
-  //   );
+  //   //     setFilePerc(roundedProgress);
+
+  //   //     console.log("upload is " + roundedProgress + "%done");
+  //   //   },
+  //   //   (error) => {
+  //   //     console.log(error);
+  //   //     setFileUploadError(true);
+  //   //   },
+  //   //   () => {
+  //   //     getDownloadURL(uploadTask.snapshot.ref).then((downloadURl) => {
+  //   //       setFormData({ ...formData, avatar: downloadURl });
+  //   //     });
+  //   //   },
+  //   // );
   // };
 
   const handleChange = (e) => {
@@ -147,9 +177,7 @@ export default function Profile() {
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
       <form onSubmit={handleSubmit} action="" className="flex flex-col gap-4">
         <input
-          onChange={(e) => {
-            setFile(e.target.files[0]);
-          }}
+          onChange={handleFileUpload}
           type="file"
           ref={fileRef}
           hidden
