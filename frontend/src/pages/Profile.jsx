@@ -173,6 +173,10 @@ export default function Profile() {
     }
   };
 
+  // const handleShowListings = async()=>{
+
+  // }
+
   return (
     <div className="mx-auto p-3 max-w-lg ">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
@@ -249,6 +253,7 @@ export default function Profile() {
       <p className="mt-5 text-green-700">
         {updateSuccess ? "user updated successfully " : ""}
       </p>
+      {/* <button onClick={handleShowListings} className="text-green-700 w-full">Show Listings</button> */}
     </div>
   );
 }
