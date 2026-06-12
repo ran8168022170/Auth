@@ -1,3 +1,4 @@
+import Listing from "../model/listing.model.js";
 import User from "../model/user.model.js";
 import { errorHandler } from "../utils/error.js";
 import bcrypt from "bcryptjs";
@@ -47,3 +48,16 @@ export const deleteUser = async (req, res, next) => {
     next(error);
   }
 };
+
+// export const getUserListings = async (req, res, next) => {
+//   if (req.user.id === req.params.id) {
+//     try {
+//       const listing = await Listing.find({ userRef: req.params.id });
+//       res.status(201).json(listing);
+//     } catch (error) {
+//       next(error);
+//     }
+//   } else {
+//     return next(errorHandler(401, "you can get only your listing "));
+//   }
+// };
