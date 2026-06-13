@@ -138,6 +138,8 @@ export default function CreateListing() {
       if (data.success === false) {
         setError(data.message);
       }
+      alert("Listing created successfully!");
+
       console.log("data is", data);
     } catch (error) {
       setError(error.message);
