@@ -1,9 +1,12 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
 
-export default function CreateListing() {
+export default function UpdateListing() {
   const { currentUser } = useSelector((state) => state.user);
+  const navigate = useNavigate();
+  const params = useParams();
   const [files, setFiles] = useState([]);
   const [formData, setFormData] = useState({
     imageUrls: [],
@@ -25,6 +28,20 @@ export default function CreateListing() {
   const [loading, setLoading] = useState(false);
 
   console.log(formData);
+
+  useEffect(() => {
+    const fetchListing = async () => {
+      const listingId = params.listingId;
+      const res = await fetch(`/api/listing/get/${listingId}`);
+      const data = await res.json();
+      if (data.success === false) {
+        console.log(data.message);
+      }
+      setFormData(data);
+    };
+
+    fetchListing();
+  }, []);
 
   const handleImageSubmit = async () => {
     if (files.length === 0) {
@@ -116,14 +133,12 @@ export default function CreateListing() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (formData.imageUrls.length < 1)
-        return setError("you must upload atleast one image ");
       if (+formData.regularPrice < +formData.discountedPrice)
         return setError("Discount price can not be more than regular price  ");
 
       setLoading(true);
       setError(false);
-      const res = await fetch("/api/listing/create", {
+      const res = await fetch(`/api/listing/update/${params.listingId}`, {
         method: "post",
         headers: {
           "Content-Type": "application/json",
@@ -138,7 +153,8 @@ export default function CreateListing() {
       if (data.success === false) {
         setError(data.message);
       }
-      alert("Listing created successfully!");
+      alert("Listing updated successfully!");
+      navigate(`/listing/${data._id}`);
 
       console.log("data is", data);
     } catch (error) {
@@ -149,7 +165,7 @@ export default function CreateListing() {
   return (
     <main className="p-3 max-w-6xl mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">
-        Create a Listing
+        Update a Listing
       </h1>
       <form action="" className="flex flex-col sm:flex-row gap-4">
         <div className="flex flex-col gap-4 flex-1">
@@ -353,7 +369,7 @@ export default function CreateListing() {
             onClick={handleSubmit}
             className="p-3 bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 disabled:opacity-80 "
           >
-            {loading ? "Creating..." : "Create Listing"}
+            {loading ? "updating..." : "update Listing"}
           </button>
           {error && <p className="text-red-700 text-sm">{error}</p>}
         </div>
